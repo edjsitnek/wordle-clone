@@ -5,7 +5,7 @@ export default function Keyboard() {
 
   return (
     <div className="keyboard">
-      <div className="row1">
+      <div className="keyboardRow">
         {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
           .map((keyValue, i) => (
             <button className="key" key={i}>
@@ -13,7 +13,7 @@ export default function Keyboard() {
             </button>
           ))}
       </div>
-      <div className="row2">
+      <div className="keyboardRow">
         {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
           .map((keyValue, i) => (
             <button className="key" key={i}>
@@ -21,7 +21,7 @@ export default function Keyboard() {
             </button>
           ))}
       </div>
-      <div className="row3">
+      <div className="keyboardRow">
         {['↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←']
           .map((keyValue, i) => (
             <button className="key" key={i}>
@@ -29,14 +29,6 @@ export default function Keyboard() {
             </button>
           ))}
       </div>
-
-
-
-      {/* {keys.map((key, i) => (
-        <button className="key" key={i}>
-          {key}
-        </button>
-      ))} */}
     </div>
   );
 };

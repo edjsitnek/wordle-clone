@@ -1,34 +1,85 @@
+import { useState, useEffect } from "react";
+
 // An on-screen keyboard for typing guesses
-export default function Keyboard() {
-  const keys = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
-  // ↵←
+export default function Keyboard({ onKeyPress }) {
+  const keys = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
+  const [screenSize, setScreenSize] = useState(window.innerWidth); // Keep track of current screen size
+  useEffect(() => {
+    // Uses the size of the screen to know when to rearrange components
+    function handleResize() {
+      setScreenSize(window.innerWidth);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    }
+  }, []);
 
   return (
     <div className="keyboard">
-      <div className="keyboardRow">
-        {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']
-          .map((keyValue, i) => (
-            <button className="key" key={i}>
-              {keyValue}
+      {screenSize > 400 ? ( // Component locations for larger screens
+        <>
+          <div className="keyboard-row">
+            {keys.slice(0, 10).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            {keys.slice(10, 19).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            <button className="key key-large" onClick={() => onKeyPress('Enter')}>
+              Enter
             </button>
-          ))}
-      </div>
-      <div className="keyboardRow">
-        {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']
-          .map((keyValue, i) => (
-            <button className="key" key={i}>
-              {keyValue}
+            {keys.slice(19).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+            <button className="key key-large" onClick={() => onKeyPress('Backspace')}>
+              ⌫
             </button>
-          ))}
-      </div>
-      <div className="keyboardRow">
-        {['↵', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '←']
-          .map((keyValue, i) => (
-            <button className="key" key={i}>
-              {keyValue}
+          </div>
+        </>
+      ) : ( // Component locations for smaller screens
+        <>
+          <div className="keyboard-row">
+            {keys.slice(0, 10).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            {keys.slice(10, 19).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            {keys.slice(19).map((key, i) => (
+              <button key={i} className="key" onClick={() => onKeyPress(key)}>
+                {key}
+              </button>
+            ))}
+          </div>
+          <div className="keyboard-row">
+            <button className="key key-large" onClick={() => onKeyPress('Enter')}>
+              Enter
             </button>
-          ))}
-      </div>
+            <button className="key key-large" onClick={() => onKeyPress('Backspace')}>
+              ⌫
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

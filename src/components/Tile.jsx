@@ -1,7 +1,7 @@
 // A single tile for inputting letters for a guess
-export default function Tile({ letter }) {
+export default function Tile({ letter, status }) {
   return (
-    <div className={"tile"}>
+    <div className={`tile ${status}`}>
       {letter}
     </div>
   );

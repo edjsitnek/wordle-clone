@@ -15,6 +15,7 @@ export default function App() {
   const [validGuesses, setValidGuesses] = useState([]); // List of valid guesses (from valid-guesses.txt)
   const [possibleSolutions, setPossibleSolutions] = useState([]); // List of possible solutions (from possible-solutions.txt)
   const [solution, setSolution] = useState(''); // The randomly selected solution
+  const [gameOver, setGameOver] = useState(false); // Track whether game is over
 
 
   // Load word lists when the component mounts
@@ -42,6 +43,7 @@ export default function App() {
   // Handle physical keyboard input using keydown event
   useEffect(() => {
     const handleKeyDown = (event) => {
+      if (gameOver) return; // Prevent input if game is over
       const key = event.key.toUpperCase();
 
       if (key === "ENTER") {
@@ -58,9 +60,12 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [currentGuess, guesses, solution]); // Include dependencies to ensure correct state is available
+  }, [currentGuess, guesses, solution, gameOver]); // Include dependencies to ensure correct state is available
 
+  // Handle clicking on the onscreen keyboard
   const handleKeyPress = (key) => {
+    if (gameOver) return; // Prevent input if game is over
+
     if (key !== "Enter" && key !== "Backspace") {
       handleLetterInput(key)
     }
@@ -80,6 +85,7 @@ export default function App() {
     setCurrentGuess(currentGuess.slice(0, -1));
   }
 
+  // Handle updating tile statuses/colors
   const handleStatuses = () => {
     const newStatuses = currentGuess.map((letter, i) => {
       if (letter.toLowerCase() === solution[i]) return 'correct';
@@ -96,6 +102,8 @@ export default function App() {
   }
 
   const handleSubmitGuess = () => {
+    if (gameOver) return; // Prevent submitting if game is over
+
     const wholeGuess = currentGuess.join('').toLowerCase(); // Convert guess to whole lowercase word for comparisons
 
     if (currentGuess.length === WORD_LENGTH && (validGuesses.includes(wholeGuess) || possibleSolutions.includes(wholeGuess))) {
@@ -105,19 +113,42 @@ export default function App() {
       setGuesses(updatedGuesses);
 
       handleStatuses();
+
+      if (wholeGuess === solution) {
+        setGameOver(true);
+        alert(`You guessed the correct word in ${attempts + 1} attempts!`);
+        return;
+      }
+
       setCurrentGuess([]);
       setAttempts(attempts + 1);  // Move to the next row for the next guess
 
-      if (wholeGuess === solution) {
-        alert('You guessed the correct word!');
+      if (attempts + 1 === TOTAL_ROWS) {
+        setGameOver(true); // Game over when max attempts are reached
+        alert(`Game Over! The correct word was ${solution}`);
       }
     }
+  };
+
+  // Reset the game
+  const resetGame = () => {
+    const randomSolution = possibleSolutions[Math.floor(Math.random() * possibleSolutions.length)];
+    setSolution(randomSolution);
+    setGuesses(Array(TOTAL_ROWS).fill([]));
+    setStatuses(Array(TOTAL_ROWS).fill([]));
+    setCurrentGuess([]);
+    setAttempts(0);
+    setGameOver(false);
   };
 
   return (
     <div className="gameContainer">
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={statuses} />
       <Keyboard onKeyPress={handleKeyPress} />
+
+      {gameOver && (
+        <button onClick={resetGame} className="resetButton">Start New Game</button>
+      )}
     </div>
   );
 };

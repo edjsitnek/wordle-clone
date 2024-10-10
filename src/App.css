@@ -97,6 +97,21 @@ h1 {
   margin-top: 3rem;
 }
 
+.resetButton {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  background-color: #45a049;
+}
+
 @media (max-width: 500px) {
   .keyboard {
     width: 90%;

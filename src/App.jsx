@@ -39,20 +39,45 @@ export default function App() {
       });
   }, []);
 
+  // Handle physical keyboard input using keydown event
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const key = event.key.toUpperCase();
+
+      if (key === "ENTER") {
+        handleSubmitGuess();
+      } else if (key === "BACKSPACE") {
+        handleBackspace();
+      } else if (/^[A-Z]$/.test(key)) {
+        handleLetterInput(key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    // Clean up event listener when the component unmounts
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [currentGuess, guesses, solution]); // Include dependencies to ensure correct state is available
+
   const handleKeyPress = (key) => {
     if (key !== "Enter" && key !== "Backspace") {
-      if (currentGuess.length < WORD_LENGTH) {
-        setCurrentGuess([...currentGuess, key]);
-      }
+      handleLetterInput(key)
     }
     else if (key === "Enter") {
-      if (currentGuess.length === WORD_LENGTH) {
-        handleSubmitGuess();
-      };
+      handleSubmitGuess();
     }
     else if (key === "Backspace") {
-      setCurrentGuess(currentGuess.slice(0, -1));
+      handleBackspace();
     }
+  }
+  const handleLetterInput = (key) => {
+    if (currentGuess.length < WORD_LENGTH) {
+      setCurrentGuess([...currentGuess, key]);
+    }
+  }
+  const handleBackspace = () => {
+    setCurrentGuess(currentGuess.slice(0, -1));
   }
 
   const handleStatuses = () => {
@@ -88,6 +113,7 @@ export default function App() {
       }
     }
   };
+
   return (
     <div className="gameContainer">
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={statuses} />

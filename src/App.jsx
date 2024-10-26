@@ -9,7 +9,7 @@ const WORD_LENGTH = 5;
 export default function App() {
   // Track all guesses (each guess is an array of letters)
   const [guesses, setGuesses] = useState(Array(TOTAL_ROWS).fill([]));
-  const [statuses, setStatuses] = useState(Array(TOTAL_ROWS).fill([]));
+  const [tileStatuses, setTileStatuses] = useState(Array(TOTAL_ROWS).fill([]));
   const [currentGuess, setCurrentGuess] = useState([]);  // Track current input
   const [attempts, setAttempts] = useState(0);  // Track the current attempt number
   const [validGuesses, setValidGuesses] = useState([]); // List of valid guesses (from valid-guesses.txt)
@@ -36,7 +36,7 @@ export default function App() {
         setPossibleSolutions(words);
 
         const randomSolution = words[Math.floor(Math.random() * words.length)];
-        setSolution(randomSolution);
+        setSolution("seems");
       });
   }, []);
 
@@ -87,14 +87,35 @@ export default function App() {
 
   // Handle updating tile statuses/colors
   const handleStatuses = () => {
-    const newStatuses = currentGuess.map((letter, i) => {
-      if (letter.toLowerCase() === solution[i]) return 'correct';
-      if (solution.includes(letter.toLowerCase())) return 'wrongSpot';
-      return 'incorrect';
-    })
+    const normalizedGuess = currentGuess.map(letter => letter.toLowerCase());
+    const newStatuses = Array(WORD_LENGTH).fill('incorrect');
+
+    // Create a count of letters in the solution
+    const solutionLetterCounts = {};
+    solution.split('').forEach(letter => {
+      solutionLetterCounts[letter] = (solutionLetterCounts[letter] || 0) + 1;
+    });
+
+    // First pass: Mark "correct" (green) letters
+    normalizedGuess.forEach((letter, i) => {
+      if (letter === solution[i]) {
+        newStatuses[i] = 'correct';
+        solutionLetterCounts[letter]--; // Decrement count for correct letters
+      }
+    });
+
+    // Second pass: Mark "wrongSpot" (yellow) letters if there are unused occurrences
+    normalizedGuess.forEach((letter, i) => {
+      if (newStatuses[i] === 'correct') return; // Skip already marked "correct" letters
+
+      if (solutionLetterCounts[letter] > 0) { // If letter exists in solution and hasn't been fully used
+        newStatuses[i] = 'wrongSpot';
+        solutionLetterCounts[letter]--; // Decrement count for this letter in the solution
+      }
+    });
 
     // Fill the next empty spot (current guess) with updated status colors
-    setStatuses((prevStatuses) => {
+    setTileStatuses((prevStatuses) => {
       const newStatusesArr = [...prevStatuses];
       newStatusesArr[prevStatuses.findIndex((s) => s.length === 0)] = newStatuses;
       return newStatusesArr;
@@ -135,7 +156,7 @@ export default function App() {
     const randomSolution = possibleSolutions[Math.floor(Math.random() * possibleSolutions.length)];
     setSolution(randomSolution);
     setGuesses(Array(TOTAL_ROWS).fill([]));
-    setStatuses(Array(TOTAL_ROWS).fill([]));
+    setTileStatuses(Array(TOTAL_ROWS).fill([]));
     setCurrentGuess([]);
     setAttempts(0);
     setGameOver(false);
@@ -143,7 +164,7 @@ export default function App() {
 
   return (
     <div className="gameContainer">
-      <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={statuses} />
+      <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />
       <Keyboard onKeyPress={handleKeyPress} />
 
       {gameOver && (

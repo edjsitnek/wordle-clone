@@ -9,8 +9,9 @@ const WORD_LENGTH = 5;
 export default function App() {
   const [guesses, setGuesses] = useState(Array(TOTAL_ROWS).fill([])); // Track all guesses (each guess is an array of letters)
   const [tileStatuses, setTileStatuses] = useState(Array(TOTAL_ROWS).fill([])); // Game tile statuses
-  const [keyStatuses, setKeyStatuses] = useState({}); // Keyboard key statuses
+  const [keyStatuses, setKeyStatuses] = useState([]); // Keyboard key statuses
   const [currentGuess, setCurrentGuess] = useState([]);  // Track current input
+  const [guessHistory, setGuessHistory] = useState([]); // Track history of guessed words
   const [attempts, setAttempts] = useState(0);  // Track the current attempt number
   const [validGuesses, setValidGuesses] = useState([]); // List of valid guesses (from valid-guesses.txt)
   const [possibleSolutions, setPossibleSolutions] = useState([]); // List of possible solutions (from possible-solutions.txt)
@@ -139,25 +140,32 @@ export default function App() {
     const wholeGuess = currentGuess.join('').toLowerCase(); // Convert guess to whole lowercase word for comparisons
 
     if (currentGuess.length === WORD_LENGTH && (validGuesses.includes(wholeGuess) || possibleSolutions.includes(wholeGuess))) {
-      // Update guesses state with the current guess
-      const updatedGuesses = [...guesses];
-      updatedGuesses[attempts] = currentGuess;
-      setGuesses(updatedGuesses);
+      if (guessHistory && !guessHistory.includes(wholeGuess)) { // If there is a guess history, don't allow a repeated guess
+        // Update guesses state with the current guess
+        const updatedGuesses = [...guesses];
+        updatedGuesses[attempts] = currentGuess;
+        setGuesses(updatedGuesses);
 
-      handleStatuses();
+        // Update guess history state with current guess
+        const updatedGuessHistory = [...guessHistory];
+        updatedGuessHistory[attempts] = wholeGuess;
+        setGuessHistory(updatedGuessHistory);
 
-      if (wholeGuess === solution) {
-        setGameOver(true);
-        alert(`You guessed the correct word in ${attempts + 1} attempts!`);
-        return;
-      }
+        handleStatuses();
 
-      setCurrentGuess([]);
-      setAttempts(attempts + 1);  // Move to the next row for the next guess
+        if (wholeGuess === solution) {
+          setGameOver(true);
+          alert(`You guessed the correct word in ${attempts + 1} attempts!`);
+          return;
+        }
 
-      if (attempts + 1 === TOTAL_ROWS) {
-        setGameOver(true); // Game over when max attempts are reached
-        alert(`Game Over! The correct word was ${solution}`);
+        setCurrentGuess([]);
+        setAttempts(attempts + 1);  // Move to the next row for the next guess
+
+        if (attempts + 1 === TOTAL_ROWS) {
+          setGameOver(true); // Game over when max attempts are reached
+          alert(`Game Over! The correct word was ${solution}`);
+        }
       }
     }
   };

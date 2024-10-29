@@ -7,9 +7,9 @@ const TOTAL_ROWS = 6;
 const WORD_LENGTH = 5;
 
 export default function App() {
-  // Track all guesses (each guess is an array of letters)
-  const [guesses, setGuesses] = useState(Array(TOTAL_ROWS).fill([]));
-  const [tileStatuses, setTileStatuses] = useState(Array(TOTAL_ROWS).fill([]));
+  const [guesses, setGuesses] = useState(Array(TOTAL_ROWS).fill([])); // Track all guesses (each guess is an array of letters)
+  const [tileStatuses, setTileStatuses] = useState(Array(TOTAL_ROWS).fill([])); // Game tile statuses
+  const [keyStatuses, setKeyStatuses] = useState({}); // Keyboard key statuses
   const [currentGuess, setCurrentGuess] = useState([]);  // Track current input
   const [attempts, setAttempts] = useState(0);  // Track the current attempt number
   const [validGuesses, setValidGuesses] = useState([]); // List of valid guesses (from valid-guesses.txt)
@@ -36,7 +36,7 @@ export default function App() {
         setPossibleSolutions(words);
 
         const randomSolution = words[Math.floor(Math.random() * words.length)];
-        setSolution("seems");
+        setSolution(randomSolution);
       });
   }, []);
 
@@ -87,37 +87,48 @@ export default function App() {
 
   // Handle updating tile statuses/colors
   const handleStatuses = () => {
-    const normalizedGuess = currentGuess.map(letter => letter.toLowerCase());
-    const newStatuses = Array(WORD_LENGTH).fill('incorrect');
+    // Normalize to uppercase so the Keyboard keys have correct reference
+    const normalizedGuess = currentGuess.map(letter => letter.toUpperCase());
+    const normalizedSolution = solution.toUpperCase();
+    const newTileStatuses = Array(WORD_LENGTH).fill('incorrect');
+    const newKeyStatuses = { ...keyStatuses };
 
     // Create a count of letters in the solution
     const solutionLetterCounts = {};
-    solution.split('').forEach(letter => {
+    for (const letter of normalizedSolution) {
       solutionLetterCounts[letter] = (solutionLetterCounts[letter] || 0) + 1;
-    });
+    };
 
     // First pass: Mark "correct" (green) letters
     normalizedGuess.forEach((letter, i) => {
-      if (letter === solution[i]) {
-        newStatuses[i] = 'correct';
+      if (letter === normalizedSolution[i]) {
+        newTileStatuses[i] = 'correct';
         solutionLetterCounts[letter]--; // Decrement count for correct letters
+        newKeyStatuses[letter] = 'correct';
       }
     });
 
     // Second pass: Mark "wrongSpot" (yellow) letters if there are unused occurrences
     normalizedGuess.forEach((letter, i) => {
-      if (newStatuses[i] === 'correct') return; // Skip already marked "correct" letters
+      if (newTileStatuses[i] === 'correct') return; // Skip already marked "correct" letters
 
       if (solutionLetterCounts[letter] > 0) { // If letter exists in solution and hasn't been fully used
-        newStatuses[i] = 'wrongSpot';
+        newTileStatuses[i] = 'wrongSpot';
         solutionLetterCounts[letter]--; // Decrement count for this letter in the solution
+        if (newKeyStatuses[letter] !== 'correct') {
+          newKeyStatuses[letter] = 'wrongSpot';
+        }
+      } else if (!newKeyStatuses[letter]) {
+        newKeyStatuses[letter] = 'incorrect';
       }
     });
 
+    // Update keyStatus with updated values
+    setKeyStatuses({ ...newKeyStatuses });
     // Fill the next empty spot (current guess) with updated status colors
     setTileStatuses((prevStatuses) => {
       const newStatusesArr = [...prevStatuses];
-      newStatusesArr[prevStatuses.findIndex((s) => s.length === 0)] = newStatuses;
+      newStatusesArr[prevStatuses.findIndex((s) => s.length === 0)] = newTileStatuses;
       return newStatusesArr;
     });
   }
@@ -157,6 +168,7 @@ export default function App() {
     setSolution(randomSolution);
     setGuesses(Array(TOTAL_ROWS).fill([]));
     setTileStatuses(Array(TOTAL_ROWS).fill([]));
+    setKeyStatuses({});
     setCurrentGuess([]);
     setAttempts(0);
     setGameOver(false);
@@ -165,7 +177,7 @@ export default function App() {
   return (
     <div className="gameContainer">
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />
-      <Keyboard onKeyPress={handleKeyPress} />
+      <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
 
       {gameOver && (
         <button onClick={resetGame} className="resetButton">Start New Game</button>

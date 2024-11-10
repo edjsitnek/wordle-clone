@@ -124,14 +124,23 @@ export default function App() {
       }
     });
 
-    // Update keyStatus with updated values
-    setKeyStatuses({ ...newKeyStatuses });
-    // Fill the next empty spot (current guess) with updated status colors
-    setTileStatuses((prevStatuses) => {
-      const newStatusesArr = [...prevStatuses];
-      newStatusesArr[prevStatuses.findIndex((s) => s.length === 0)] = newTileStatuses;
-      return newStatusesArr;
+    // Determine the row index to update before starting the staggered updates
+    const rowIndex = tileStatuses.findIndex((s) => s.length === 0);
+
+    // Stagger the tile status updates for individual flipping effect
+    newTileStatuses.forEach((status, index) => {
+      setTimeout(() => {
+        setTileStatuses((prevStatuses) => {
+          const newStatusesArr = [...prevStatuses];
+          newStatusesArr[rowIndex] = [...newStatusesArr[rowIndex]]; // Make a shallow copy of the row
+          newStatusesArr[rowIndex][index] = status; // Update the status of the specific tile
+          return newStatusesArr;
+        });
+      }, index * 300); // 300ms delay between each tile flipping
     });
+
+    // Update keyStatuses with updated values
+    setKeyStatuses({ ...newKeyStatuses });
   }
 
   const handleSubmitGuess = () => {
@@ -155,7 +164,7 @@ export default function App() {
 
         if (wholeGuess === solution) {
           setGameOver(true);
-          alert(`You guessed the correct word in ${attempts + 1} attempts!`);
+          // alert(`You guessed the correct word in ${attempts + 1} attempts!`);
           return;
         }
 
@@ -184,6 +193,7 @@ export default function App() {
 
   return (
     <div className="gameContainer">
+      <p>{solution}</p>
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />
       <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
 

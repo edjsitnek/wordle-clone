@@ -40,18 +40,47 @@ h1 {
 }
 
 .tile.correct {
-  background-color: green;
-  border: 0.15rem solid rgb(0, 75, 0)
+  --background-color: green;
+  --border-color: rgb(0, 75, 0);
+  animation: flip 0.6s ease forwards;
 }
 
 .tile.wrongSpot {
-  background-color: gold;
-  border: 0.15rem solid rgb(185, 158, 2)
+  --background-color: gold;
+  --border-color: rgb(185, 158, 2);
+  animation: flip 0.6s ease forwards;
 }
 
 .tile.incorrect {
-  background-color: gray;
-  border: 0.15rem solid rgb(78, 78, 78)
+  --background-color: gray;
+  --border-color: rgb(78, 78, 78);
+  animation: flip 0.6s ease forwards;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(0);
+    background-color: black;
+    border-color: gray;
+  }
+
+  50% {
+    transform: rotateX(90deg);
+    background-color: black;
+    border-color: gray;
+  }
+
+  51% {
+    transform: rotateX(90deg);
+    background-color: var(--background-color);
+    border-color: var(--border-color);
+  }
+
+  100% {
+    transform: rotateX(0deg);
+    background-color: var(--background-color);
+    border-color: var(--border-color);
+  }
 }
 
 .row {

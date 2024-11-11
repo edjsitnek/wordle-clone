@@ -1,6 +1,7 @@
 import './App.css'
 import Grid from './components/Grid'
 import Keyboard from './components/Keyboard'
+import Modal from './components/Modal'
 import { useState, useEffect } from 'react';
 
 const TOTAL_ROWS = 6;
@@ -17,6 +18,8 @@ export default function App() {
   const [possibleSolutions, setPossibleSolutions] = useState([]); // List of possible solutions (from possible-solutions.txt)
   const [solution, setSolution] = useState(''); // The randomly selected solution
   const [gameOver, setGameOver] = useState(false); // Track whether game is over
+  const [isWin, setIsWin] = useState(false); // Track if the game over is a win or not
+  const [modalOpen, setModalOpen] = useState(false); // Track if modal is open
 
 
   // Load word lists when the component mounts
@@ -162,18 +165,24 @@ export default function App() {
 
         handleStatuses();
 
-        if (wholeGuess === solution) {
-          setGameOver(true);
-          // alert(`You guessed the correct word in ${attempts + 1} attempts!`);
+        if (wholeGuess === solution) { // Game over when the solution is guessed
+          setTimeout(() => {
+            setGameOver(true);
+            setIsWin(true);
+            setModalOpen(true);
+          }, 2000);
           return;
         }
 
         setCurrentGuess([]);
         setAttempts(attempts + 1);  // Move to the next row for the next guess
 
-        if (attempts + 1 === TOTAL_ROWS) {
-          setGameOver(true); // Game over when max attempts are reached
-          alert(`Game Over! The correct word was ${solution}`);
+        if (attempts + 1 === TOTAL_ROWS) { // Game over when max attempts are reached
+          setTimeout(() => {
+            setGameOver(true);
+            setIsWin(false);
+            setModalOpen(true);
+          }, 2000);
         }
       }
     }
@@ -198,7 +207,11 @@ export default function App() {
       <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
 
       {gameOver && (
-        <button onClick={resetGame} className="resetButton">Start New Game</button>
+        modalOpen ? (
+          <Modal isWin={isWin} numGuesses={attempts + 1} solution={solution} onClickX={setModalOpen} onClickReset={resetGame} />
+        ) : (
+          <button onClick={resetGame} className="resetButton">Start New Game</button>
+        )
       )}
     </div>
   );

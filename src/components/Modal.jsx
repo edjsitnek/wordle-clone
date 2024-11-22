@@ -1,5 +1,26 @@
 // A modal that pops up when a game over is reached
-export default function Modal({ isWin, numGuesses, solution, onClickX, onClickReset }) {
+export default function Modal({ isWin, numGuesses, solution, onClickX, onClickReset, stats }) {
+  const fillStats = () => {
+    return (
+      <div className="stats">
+        <ul>
+          <li>
+            <div className="statNum">{stats.gamesPlayed}</div>
+            <div className="statName">Played</div>
+          </li>
+          <li>
+            <div className="statNum">{stats.winPercentage}</div>
+            <div className="statName">Win%</div>
+          </li>
+          <li>
+            <div className="statNum">{stats.averageAttempts}</div>
+            <div className="statName">Average Attempts</div>
+          </li>
+        </ul>
+      </div>
+    )
+  }
+
   return (
     // Clicking on the background will close modal
     <div className="modalBackground" onClick={() => onClickX(false)}>
@@ -19,6 +40,7 @@ export default function Modal({ isWin, numGuesses, solution, onClickX, onClickRe
                 <p>You guessed the correct word in {numGuesses} attempts!</p>
               )}
             </div>
+            {fillStats()}
           </>
         ) : ( // Message if the game was lost
           <>
@@ -28,6 +50,7 @@ export default function Modal({ isWin, numGuesses, solution, onClickX, onClickRe
             <div className="body">
               <p>The correct word was {solution}</p>
             </div>
+            {fillStats()}
           </>
         )}
 

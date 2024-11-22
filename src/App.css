@@ -194,6 +194,33 @@ h1 {
   align-items: center;
 }
 
+.stats {
+  display: flex;
+  justify-content: center;
+}
+
+.stats ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+}
+
+.stats li {
+  width: 25%;
+  margin: 1rem;
+}
+
+.statNum {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.statName {
+  text-align: center;
+  font-size: 1rem;
+}
+
 .resetButton {
   margin-top: 20px;
   padding: 10px 20px;

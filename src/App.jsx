@@ -6,6 +6,18 @@ import { useState, useEffect } from 'react';
 
 const TOTAL_ROWS = 6;
 const WORD_LENGTH = 5;
+const defaultStats = {
+  gamesPlayed: 0,
+  gamesWon: 0,
+  winPercentage: 0,
+  totalAttempts: 0,
+  averageAttempts: 0
+}
+
+const initializeStats = () => {
+  const savedStats = localStorage.getItem('stats');
+  return savedStats ? JSON.parse(savedStats) : defaultStats;
+}
 
 export default function App() {
   const [guesses, setGuesses] = useState(Array(TOTAL_ROWS).fill([])); // Track all guesses (each guess is an array of letters)
@@ -20,7 +32,11 @@ export default function App() {
   const [gameOver, setGameOver] = useState(false); // Track whether game is over
   const [isWin, setIsWin] = useState(false); // Track if the game over is a win or not
   const [modalOpen, setModalOpen] = useState(false); // Track if modal is open
+  const [stats, setStats] = useState(initializeStats); // Track statistics of previous games played
 
+  useEffect(() => {
+    localStorage.setItem('stats', JSON.stringify(stats));
+  }, [stats])
 
   // Load word lists when the component mounts
   useEffect(() => {
@@ -146,6 +162,35 @@ export default function App() {
     setKeyStatuses({ ...newKeyStatuses });
   }
 
+  const handleStatistics = (won, attempts) => {
+    setStats((prevStats) => {
+      const updatedStats = { ...prevStats };
+
+      // Increment games played
+      updatedStats.gamesPlayed += 1;
+
+      if (won) {
+        // Increment games won
+        updatedStats.gamesWon += 1;
+
+        // Add attempts to total attempts
+        updatedStats.totalAttempts += attempts;
+
+        // Calculate average attempts
+        updatedStats.averageAttempts = (
+          updatedStats.totalAttempts / updatedStats.gamesWon
+        ).toFixed(2); // Round to 2 decimal places
+      }
+
+      // Update win percentage
+      updatedStats.winPercentage = Math.round(
+        (updatedStats.gamesWon / updatedStats.gamesPlayed) * 100
+      );
+
+      return updatedStats;
+    })
+  }
+
   const handleSubmitGuess = () => {
     if (gameOver) return; // Prevent submitting if game is over
 
@@ -170,6 +215,7 @@ export default function App() {
             setGameOver(true);
             setIsWin(true);
             setModalOpen(true);
+            handleStatistics(true, attempts + 1);
           }, 2000);
           return;
         }
@@ -182,6 +228,7 @@ export default function App() {
             setGameOver(true);
             setIsWin(false);
             setModalOpen(true);
+            handleStatistics(false, attempts + 1);
           }, 2000);
         }
       }
@@ -208,7 +255,7 @@ export default function App() {
 
       {gameOver && (
         modalOpen ? (
-          <Modal isWin={isWin} numGuesses={attempts + 1} solution={solution} onClickX={setModalOpen} onClickReset={resetGame} />
+          <Modal isWin={isWin} numGuesses={attempts + 1} solution={solution} onClickX={setModalOpen} onClickReset={resetGame} stats={stats} />
         ) : (
           <button onClick={resetGame} className="resetButton">Start New Game</button>
         )

@@ -33,6 +33,7 @@ export default function App() {
   const [isWin, setIsWin] = useState(false); // Track if the game over is a win or not
   const [modalOpen, setModalOpen] = useState(false); // Track if modal is open
   const [stats, setStats] = useState(initializeStats); // Track statistics of previous games played
+  const [statsClicked, setStatsClicked] = useState(false); // Track if the stats screen is displayed
 
   useEffect(() => {
     localStorage.setItem('stats', JSON.stringify(stats));
@@ -247,15 +248,53 @@ export default function App() {
     setGameOver(false);
   };
 
+  const resetStats = () => {
+    localStorage.clear();
+    setStats(defaultStats);
+  }
+
+  const showStats = () => {
+    setModalOpen(true);
+    setStatsClicked(true);
+  }
+
   return (
     <div className="gameContainer">
-      <p>{solution}</p>
+      <div className="gameHeader">
+        <p>{solution}</p>
+        <button onClick={showStats}>Show Stats</button>
+      </div>
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />
       <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
 
+      {/* Display modal when "Show Stats" button is clicked */}
+      {statsClicked &&
+        <Modal
+          isWin={isWin}
+          numGuesses={attempts + 1}
+          solution={solution}
+          onClickX={setModalOpen}
+          onClickReset={resetGame}
+          onClickResetStats={resetStats}
+          stats={stats}
+          statsClicked={statsClicked}
+          setStatsClicked={setStatsClicked}
+        />
+      }
+      {/* Display modal when the game is over */}
       {gameOver && (
         modalOpen ? (
-          <Modal isWin={isWin} numGuesses={attempts + 1} solution={solution} onClickX={setModalOpen} onClickReset={resetGame} stats={stats} />
+          <Modal
+            isWin={isWin}
+            numGuesses={attempts + 1}
+            solution={solution}
+            onClickX={setModalOpen}
+            onClickReset={resetGame}
+            onClickResetStats={resetStats}
+            stats={stats}
+            statsClicked={statsClicked}
+            setStatsClicked={setStatsClicked}
+          />
         ) : (
           <button onClick={resetGame} className="resetButton">Start New Game</button>
         )

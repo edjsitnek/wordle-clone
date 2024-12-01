@@ -34,6 +34,7 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false); // Track if modal is open
   const [stats, setStats] = useState(initializeStats); // Track statistics of previous games played
   const [statsClicked, setStatsClicked] = useState(false); // Track if the stats screen is displayed
+  const [answerText, setAnswerText] = useState("Click to view solution"); // Message that can show the game solution for testing purposes
 
   useEffect(() => {
     localStorage.setItem('stats', JSON.stringify(stats));
@@ -246,6 +247,7 @@ export default function App() {
     setCurrentGuess([]);
     setAttempts(0);
     setGameOver(false);
+    setAnswerText("Click to view solution")
   };
 
   const resetStats = () => {
@@ -258,10 +260,19 @@ export default function App() {
     setStatsClicked(true);
   }
 
+  const handleAnswerText = () => {
+    if (answerText === "Click to view solution") {
+      setAnswerText(solution)
+    }
+    else {
+      setAnswerText("Click to view solution")
+    }
+  }
+
   return (
     <div className="gameContainer">
       <div className="gameHeader">
-        <p>{solution}</p>
+        <p onClick={handleAnswerText}>{answerText}</p>
         <button onClick={showStats}>Show Stats</button>
       </div>
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />

@@ -1,5 +1,6 @@
-// A modal that pops up when a game over is reached
+// A modal that pops up when a game over is reached or when the "View Stats" button is reached
 export default function Modal({ isWin, numGuesses, solution, onClickX, onClickReset, onClickResetStats, stats, statsClicked, setStatsClicked }) {
+  // Fill stat content into the modal during different conditions
   const fillStats = () => {
     return (
       <div className="stats">
@@ -43,7 +44,7 @@ export default function Modal({ isWin, numGuesses, solution, onClickX, onClickRe
         </>
       )
     }
-    if (isWin === false && statsClicked === true) { // Content if "Show Stats" was clicked
+    if (statsClicked === true) { // Content if "Show Stats" was clicked
       return (
         <>
           <div className="title">

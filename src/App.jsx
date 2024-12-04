@@ -273,7 +273,7 @@ export default function App() {
     <div className="gameContainer">
       <div className="gameHeader">
         <p onClick={handleAnswerText}>{answerText}</p>
-        <button onClick={showStats}>Show Stats</button>
+        <button onClick={showStats}>View Stats</button>
       </div>
       <Grid guesses={guesses} currentGuess={currentGuess} attempts={attempts} statuses={tileStatuses} />
       <Keyboard onKeyPress={handleKeyPress} keyStatuses={keyStatuses} />
